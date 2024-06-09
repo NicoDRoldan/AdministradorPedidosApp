@@ -1,0 +1,41 @@
+﻿@model AdministradorPedidosApp.Models.ArticuloModel
+<!-- Modal -->
+<div class="modal fade" id="categoriasModal" tabindex="-1" role="dialog" aria-labelledby="categoriasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoriasModalLabel">Seleccionar Categorías</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="categoriaSearch" class="form-control" placeholder="Buscar Categoría..." />
+                <table class="table table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriasTableBody">
+                        @foreach(var categoria in ViewBag.Categorias)
+                        {
+                            <tr>
+                                <td hidden>@categoria.Id_Categoria</td>
+                                <td>@categoria.Nombre</td>
+                                <td>
+                                    <input type="checkbox" id="@categoria.Id_Categoria" name="CategoriasSeleccionadas" value="@categoria.Id_Categoria"
+                                    @(Model.CategoriasSeleccionadas.Contains(categoria.Id_Categoria) ? "checked" : "")
+                                    >
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Guardar Selección</button>
+            </div>
+        </div>
+    </div>
+</div>

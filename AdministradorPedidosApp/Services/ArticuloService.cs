@@ -90,7 +90,7 @@ namespace AdministradorPedidosApp.Services
             return articuloModel;
         }
 
-        public async Task Create(ArticuloModel articuloModel, IFormFile imagen)
+        public async Task Create(ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas)
         {
             if (imagen != null)
             {
@@ -110,10 +110,24 @@ namespace AdministradorPedidosApp.Services
                 }
                 articuloModel.Url_Imagen = "/images/" + uniqueFileName;
             }
-
             articuloModel.FechaCreacion = DateTime.Now;
 
             _context.Add(articuloModel);
+            await _context.SaveChangesAsync();
+
+            if (categoriasSeleccionadas.Any())
+            {
+                foreach(var id_Categoria in categoriasSeleccionadas)
+                {
+                    Articulos_CategoriasModel articulos_Categorias = new Articulos_CategoriasModel
+                    {
+                        Id_Articulo = articuloModel.Id_Articulo,
+                        Id_Categoria = id_Categoria
+                    };
+                    _context.Add(articulos_Categorias);
+                }
+            }
+
             await _context.SaveChangesAsync();
         }
     }

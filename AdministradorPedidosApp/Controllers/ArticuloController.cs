@@ -54,8 +54,10 @@ namespace AdministradorPedidosApp.Controllers
         // GET: Articulo/Create
         public IActionResult Create()
         {
+            var entityModel = new ArticuloModel();
+            ViewBag.Categorias = _context.Categorias.ToList();
             ViewData["Id_Rubro"] = new SelectList(_context.Rubros, "Id_Rubro", "Nombre");
-            return View();
+            return View(entityModel);
         }
 
         [HttpPost]
@@ -63,7 +65,9 @@ namespace AdministradorPedidosApp.Controllers
         public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Descripcion,Activo,FechaCreacion,Id_Rubro,Url_Imagen,Precio,Categorias")]
             ArticuloModel articuloModel, IFormFile imagen)
         {
-            await _articuloService.Create(articuloModel, imagen);
+            var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
+
+            await _articuloService.Create(articuloModel, imagen, categoriasSeleccionadas);
 
             return RedirectToAction(nameof(Index));
         }

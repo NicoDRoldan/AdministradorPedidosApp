@@ -9,6 +9,6 @@ namespace AdministradorPedidosApp.Interfaces
         Task<List<ArticuloDTO>> Index();
         Task<ArticuloDTO> Details(int? id);
 
-        Task Create(ArticuloModel articuloModel, IFormFile imagen);
+        Task Create(ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas);
     }
 }
