@@ -140,6 +140,10 @@ namespace AdministradorPedidosApp.Services
                 .Where(ac => ac.Id_Articulo == id)
                 .ToList();
 
+            List<int> idCategorias = _context.Categorias
+                .Select(ac => ac.Id_Categoria)
+                .ToList();
+
             if (imagen != null)
             {
                 //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
@@ -163,11 +167,13 @@ namespace AdministradorPedidosApp.Services
 
             if(categoriasSeleccionadas.Any())
             {
-                foreach (var id_Categoria in categoriasSeleccionadas)
+                foreach (var id_CategoriaSeleccionada in categoriasSeleccionadas)
                 {
-                    foreach(var artCat in articulosCategoriasExistentes)
+                    foreach (var id_Categoria in idCategorias)
                     {
-                        if(artCat.Id_Categoria != id_Categoria)
+                        var artCategoriaEntity = _context.Articulos_Categorias.Where(ac => ac.Id_Categoria == id_Categoria && ac.Id_Articulo == id).FirstOrDefault();
+
+                        if (id_Categoria == id_CategoriaSeleccionada && artCategoriaEntity is null)
                         {
                             Articulos_CategoriasModel articulos_Categorias = new Articulos_CategoriasModel
                             {
@@ -175,6 +181,10 @@ namespace AdministradorPedidosApp.Services
                                 Id_Categoria = id_Categoria
                             };
                             _context.Add(articulos_Categorias);
+                        }
+                        else if(!categoriasSeleccionadas.Contains(id_Categoria) && artCategoriaEntity != null)
+                        {
+                            _context.Remove(artCategoriaEntity);
                         }
                     }
                 }
