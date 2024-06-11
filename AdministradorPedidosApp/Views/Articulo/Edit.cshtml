@@ -5,6 +5,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<link href="~/css/cargarimagen.css" rel="stylesheet" />
+
 <h1>Edit</h1>
 
 <h4>ArticuloModel</h4>
@@ -49,11 +51,12 @@
 
             </div>
             <br />
-            <div class="form-group">
-                <label asp-for="Url_Imagen" class="control-label"></label>
-            </div>
             <div>
-                <input type="file" name="Imagen" class="form-control-file" />
+                <div id="dropzone" class="dropzone">
+                    Arrastra y suelta la imagen aquí o haz clic para seleccionar.
+                </div>
+                <input type="file" id="fileInput" name="Imagen" class="form-control-file" hidden/>
+                <div id="previewContainer" class="preview-container"></div>
             </div>
             <br />
             <div class="form-group">
@@ -69,4 +72,6 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/articulos/cargarimagen.js"></script>
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
 }

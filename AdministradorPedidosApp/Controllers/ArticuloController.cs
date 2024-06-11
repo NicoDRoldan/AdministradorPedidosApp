@@ -19,13 +19,11 @@ namespace AdministradorPedidosApp.Controllers
     {
         private readonly AdministradorPedidosAppContext _context;
         private readonly IArticuloService _articuloService;
-        private readonly IMemoryCache _memoryCache;
 
-        public ArticuloController(AdministradorPedidosAppContext context, IArticuloService articuloService, IMemoryCache memoryCache)
+        public ArticuloController(AdministradorPedidosAppContext context, IArticuloService articuloService)
         {
             _context = context;
             _articuloService = articuloService;
-            _memoryCache = memoryCache;
         }
 
         // GET: Articulo
@@ -95,11 +93,6 @@ namespace AdministradorPedidosApp.Controllers
 
             articuloModel.CategoriasSeleccionadas = articuloModel.Articulos_Categorias.Select(ac  => ac.Categoria.Id_Categoria).ToList();
 
-            _memoryCache.Set("FechaCreacionArt", articuloModel.FechaCreacion, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
-
             if (articuloModel == null)
             {
                 return NotFound();
@@ -122,7 +115,7 @@ namespace AdministradorPedidosApp.Controllers
                 try
                 {
                     var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
-                    _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
+                    await _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
 
                     _context.Update(articuloModel);
                     await _context.SaveChangesAsync();

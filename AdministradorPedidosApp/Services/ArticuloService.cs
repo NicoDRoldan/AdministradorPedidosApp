@@ -12,12 +12,10 @@ namespace AdministradorPedidosApp.Services
     public class ArticuloService : IArticuloService
     {
         private readonly AdministradorPedidosAppContext _context;
-        private readonly IMemoryCache _memoryCache;
 
-        public ArticuloService (AdministradorPedidosAppContext context, IMemoryCache memoryCache)
+        public ArticuloService (AdministradorPedidosAppContext context)
         {
             _context = context;
-            _memoryCache = memoryCache;
         }
 
         public async Task<List<ArticuloDTO>> Index()
@@ -137,14 +135,14 @@ namespace AdministradorPedidosApp.Services
         public async Task Edit(int id, ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas)
         {
             // Obtener las categorias existentes
-            var articulosCategoriasExistentes = _context.Articulos_Categorias
+            var articulosCategoriasExistentes = await _context.Articulos_Categorias
                 .Where(ac => ac.Id_Articulo == id)
-                .ToList();
+                .ToListAsync();
 
             // Obtener el id de todas las categorias
-            List<int> idCategorias = _context.Categorias
+            List<int> idCategorias = await _context.Categorias
                 .Select(ac => ac.Id_Categoria)
-                .ToList();
+                .ToListAsync();
 
             // Si la imagen es diferente a null
             if (imagen != null)
@@ -164,9 +162,9 @@ namespace AdministradorPedidosApp.Services
                 }
                 articuloModel.Url_Imagen = "/images/" + uniqueFileName; // Se le asigna la dirección de la imagen en base de datos
             }
+            else articuloModel.Url_Imagen = await _context.Articulos.AsNoTracking().Where(a => a.Id_Articulo == id).Select(a => a.Url_Imagen).FirstOrDefaultAsync();
 
-            // Se obtiene la fecha guardada en cache y se asigna a la entidad
-            if (_memoryCache.TryGetValue("FechaCreacionArt", out DateTime fechaCreacion)) articuloModel.FechaCreacion = fechaCreacion;
+            articuloModel.FechaCreacion = await _context.Articulos.AsNoTracking().Where(a => a.Id_Articulo == id).Select(a => a.FechaCreacion).FirstOrDefaultAsync();
 
             if (categoriasSeleccionadas.Any()) // Si la lista de categorias seleccionadas tiene por lo menos un elemento
             {
@@ -175,7 +173,7 @@ namespace AdministradorPedidosApp.Services
                     foreach (var id_Categoria in idCategorias) // Se recorren los ids de todas las categorias
                     {
                         // Se busca si el registro Articulo_Categoria existe, buscando por Id_Categoria y Id_Articulo
-                        var artCategoriaEntity = _context.Articulos_Categorias.Where(ac => ac.Id_Categoria == id_Categoria && ac.Id_Articulo == id).FirstOrDefault();
+                        var artCategoriaEntity = await _context.Articulos_Categorias.Where(ac => ac.Id_Categoria == id_Categoria && ac.Id_Articulo == id).FirstOrDefaultAsync();
 
                         // Si el Id de la categoria es igual a la categoria seleccionada, y el registro Articulo_Categoria no existe, lo inserta
                         if (id_Categoria == id_CategoriaSeleccionada && artCategoriaEntity is null)
@@ -201,29 +199,17 @@ namespace AdministradorPedidosApp.Services
                 _context.RemoveRange(articulosCategoriasExistentes);
             }
 
-            // Si el precio no es nulo entra en el if
-            if (articuloModel.Precio != null)
+            var precioExt = await _context.Precios.AsNoTracking().FirstOrDefaultAsync(p => p.Id_Articulo == id);
+
+            if (articuloModel.Precio != null && precioExt != null)
             {
-                var precioExt = _context.Precios
-                    .AsNoTracking() // Para que EF no "rastree" la entidad y que después no rompa las bolas
-                    .Where(p => p.Id_Articulo == id)
-                    .FirstOrDefault(); // Busca el registro del precio por pk
-
-                if (precioExt is null) // Si el registro no existe
-                {
-                    var montoPrecio = articuloModel.Precio.Precio; // Guarda el valor del monto de precio
-                    _context.Remove(articuloModel.Precio); // Borra el modelo asociado en la entidad articuloModel
-
-                    PrecioModel precio = new PrecioModel // Inserta el precio con los datos correspondiente
-                    {
-                        Id_Articulo = id,
-                        Precio = montoPrecio
-                    };
-                }
-                else // Si registro existe, se le asigna el id del artículo
-                {
-                    articuloModel.Precio.Id_Articulo = id;
-                }
+                articuloModel.Precio.Id_Articulo = id;
+                _context.Entry(articuloModel.Precio).State = EntityState.Modified;
+            }
+            else if (articuloModel.Precio != null && precioExt == null)
+            {
+                articuloModel.Precio.Id_Articulo = id;
+                _context.Add(articuloModel.Precio);
             }
         }
     }
