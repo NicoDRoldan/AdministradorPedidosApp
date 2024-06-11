@@ -123,7 +123,10 @@ namespace AdministradorPedidosApp.Controllers
                 {
                     var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
                     _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
-                }
+
+                    _context.Update(articuloModel);
+                    await _context.SaveChangesAsync();
+            }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ArticuloModelExists(articuloModel.Id_Articulo))
@@ -136,9 +139,6 @@ namespace AdministradorPedidosApp.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index));
-            
-            ViewData["Id_Rubro"] = new SelectList(_context.Rubros, "Id_Rubro", "Id_Rubro", articuloModel.Id_Rubro);
-            return View(articuloModel);
         }
 
         // GET: Articulo/Delete/5
