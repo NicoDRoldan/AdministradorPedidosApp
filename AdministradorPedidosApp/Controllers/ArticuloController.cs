@@ -11,6 +11,7 @@ using AdministradorPedidosApp.Models.DTOs;
 using AdministradorPedidosApp.Services;
 using AdministradorPedidosApp.Interfaces;
 using NuGet.Protocol.Core.Types;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AdministradorPedidosApp.Controllers
 {
@@ -18,11 +19,13 @@ namespace AdministradorPedidosApp.Controllers
     {
         private readonly AdministradorPedidosAppContext _context;
         private readonly IArticuloService _articuloService;
+        private readonly IMemoryCache _memoryCache;
 
-        public ArticuloController(AdministradorPedidosAppContext context, IArticuloService articuloService)
+        public ArticuloController(AdministradorPedidosAppContext context, IArticuloService articuloService, IMemoryCache memoryCache)
         {
             _context = context;
             _articuloService = articuloService;
+            _memoryCache = memoryCache;
         }
 
         // GET: Articulo
@@ -75,35 +78,51 @@ namespace AdministradorPedidosApp.Controllers
         // GET: Articulo/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            var entityModel = new ArticuloModel();
+            ViewBag.Categorias = _context.Categorias.ToList();
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var articuloModel = await _context.Articulos.FindAsync(id);
+            var articuloModel = await _context.Articulos
+                .Include(a => a.Precio)
+                .Include(a => a.Articulos_Categorias)
+                    .ThenInclude(ac => ac.Categoria)
+                .Where(a => a.Id_Articulo == id)
+                .FirstOrDefaultAsync();
+
+            articuloModel.CategoriasSeleccionadas = articuloModel.Articulos_Categorias.Select(ac  => ac.Categoria.Id_Categoria).ToList();
+
+            _memoryCache.Set("FechaCreacionArt", articuloModel.FechaCreacion, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
             if (articuloModel == null)
             {
                 return NotFound();
             }
-            ViewData["Id_Rubro"] = new SelectList(_context.Rubros, "Id_Rubro", "Id_Rubro", articuloModel.Id_Rubro);
+            ViewData["Id_Rubro"] = new SelectList(_context.Rubros, "Id_Rubro", "Nombre", articuloModel.Id_Rubro);
+
             return View(articuloModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Descripcion,Activo,FechaCreacion,Id_Rubro,Url_Imagen")] ArticuloModel articuloModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Descripcion,Activo,FechaCreacion,Id_Rubro,Url_Imagen,Precio")] 
+            ArticuloModel articuloModel, IFormFile imagen)
         {
             if (id != articuloModel.Id_Articulo)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
                 try
                 {
-                    _context.Update(articuloModel);
-                    await _context.SaveChangesAsync();
+                    var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
+                    _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,7 +136,7 @@ namespace AdministradorPedidosApp.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index));
-            }
+            
             ViewData["Id_Rubro"] = new SelectList(_context.Rubros, "Id_Rubro", "Id_Rubro", articuloModel.Id_Rubro);
             return View(articuloModel);
         }

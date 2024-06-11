@@ -5,16 +5,19 @@ using AdministradorPedidosApp.Models.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AdministradorPedidosApp.Services
 {
     public class ArticuloService : IArticuloService
     {
         private readonly AdministradorPedidosAppContext _context;
+        private readonly IMemoryCache _memoryCache;
 
-        public ArticuloService (AdministradorPedidosAppContext context)
+        public ArticuloService (AdministradorPedidosAppContext context, IMemoryCache memoryCache)
         {
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         public async Task<List<ArticuloDTO>> Index()
@@ -128,6 +131,65 @@ namespace AdministradorPedidosApp.Services
                 }
             }
 
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Edit(int id, ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas)
+        {
+            var articulosCategoriasExistentes = _context.Articulos_Categorias
+                .Where(ac => ac.Id_Articulo == id)
+                .ToList();
+
+            if (imagen != null)
+            {
+                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                var uploadsFolder = "C:\\Repositorio\\Proyecto MVC\\PedidosApp\\PedidosApp\\wwwroot\\images";
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + imagen.FileName;
+                var path = Path.Combine(uploadsFolder, uniqueFileName);
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(uploadsFolder);
+                }
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await imagen.CopyToAsync(stream);
+                }
+                articuloModel.Url_Imagen = "/images/" + uniqueFileName;
+            }
+            
+            if(_memoryCache.TryGetValue("FechaCreacionArt", out DateTime fechaCreacion)) articuloModel.FechaCreacion = fechaCreacion;
+
+            if(categoriasSeleccionadas.Any())
+            {
+                foreach (var id_Categoria in categoriasSeleccionadas)
+                {
+                    foreach(var artCat in articulosCategoriasExistentes)
+                    {
+                        if(artCat.Id_Categoria != id_Categoria)
+                        {
+                            Articulos_CategoriasModel articulos_Categorias = new Articulos_CategoriasModel
+                            {
+                                Id_Articulo = id,
+                                Id_Categoria = id_Categoria
+                            };
+                            _context.Add(articulos_Categorias);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _context.RemoveRange(articulosCategoriasExistentes);
+            }
+
+            if (articuloModel.Precio != null)
+            {
+                articuloModel.Precio.Id_Articulo = id;
+            }
+
+            _context.Update(articuloModel);
             await _context.SaveChangesAsync();
         }
     }
