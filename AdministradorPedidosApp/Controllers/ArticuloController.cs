@@ -112,26 +112,26 @@ namespace AdministradorPedidosApp.Controllers
                 return NotFound();
             }
 
-                try
-                {
-                    var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
-                    await _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
+            try
+            {
+                var categoriasSeleccionadas = Request.Form["CategoriasSeleccionadas"].Select(x => int.Parse(x)).ToList();
+                await _articuloService.Edit(id, articuloModel, imagen, categoriasSeleccionadas);
 
-                    _context.Update(articuloModel);
-                    await _context.SaveChangesAsync();
+                _context.Update(articuloModel);
+                await _context.SaveChangesAsync();
             }
-                catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ArticuloModelExists(articuloModel.Id_Articulo))
                 {
-                    if (!ArticuloModelExists(articuloModel.Id_Articulo))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Articulo/Delete/5
