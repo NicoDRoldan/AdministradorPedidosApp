@@ -7,8 +7,11 @@ namespace AdministradorPedidosApp.Interfaces
     public interface IArticuloService
     {
         Task<List<ArticuloDTO>> Index();
+
         Task<ArticuloDTO> Details(int? id);
 
         Task Create(ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas);
+
+        Task Edit(int id, ArticuloModel articuloModel, IFormFile imagen, List<int> categoriasSeleccionadas);
     }
 }

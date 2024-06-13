@@ -10,9 +10,13 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<input type="text" id="articulosSearchIndex" class="form-control" placeholder="Buscar Artículo..." />
 <table class="table">
     <thead>
         <tr>
+            <th>
+                ID
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Nombre)
             </th>
@@ -37,9 +41,12 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="articulosIndexTableBody">
 @foreach (var item in Model) {
         <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id_Articulo)
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Nombre)
             </td>
@@ -53,15 +60,15 @@
                 @Html.DisplayFor(modelItem => item.FechaCreacion)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Rubro.Id_Rubro)
+                @Html.DisplayFor(modelItem => item.Rubro.Nombre)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Precio.Precio)
+                $@Html.DisplayFor(modelItem => item.Precio.Precio)
             </td>
             <td>
                     @foreach(var categoria in item.Categorias)
                     {
-                        <span>@categoria.Nombre</span><br />
+                        <span>•@categoria.Nombre</span><br />
                     }
             </td>
             <td>
@@ -73,3 +80,7 @@
 }
     </tbody>
 </table>
+
+@section scripts{
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
+}

@@ -7,3 +7,13 @@ $(document).ready(function () {
         });
     });
 });
+
+// Script de busqueda en Modal de categorias.
+$(document).ready(function () {
+    $("#articulosSearchIndex").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $("#articulosIndexTableBody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+});

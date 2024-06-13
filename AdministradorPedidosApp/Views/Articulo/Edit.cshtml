@@ -5,13 +5,15 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<link href="~/css/cargarimagen.css" rel="stylesheet" />
+
 <h1>Edit</h1>
 
 <h4>ArticuloModel</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id_Articulo" />
             <div class="form-group">
@@ -30,20 +32,33 @@
                 </label>
             </div>
             <div class="form-group">
-                <label asp-for="FechaCreacion" class="control-label"></label>
-                <input asp-for="FechaCreacion" class="form-control" />
-                <span asp-validation-for="FechaCreacion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Id_Rubro" class="control-label"></label>
                 <select asp-for="Id_Rubro" class="form-control" asp-items="ViewBag.Id_Rubro"></select>
                 <span asp-validation-for="Id_Rubro" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Url_Imagen" class="control-label"></label>
-                <input asp-for="Url_Imagen" class="form-control" />
-                <span asp-validation-for="Url_Imagen" class="text-danger"></span>
+                <label asp-for="Precio.Precio" class="control-label"></label>
+                <input asp-for="Precio.Precio" class="form-control" data-val="false" />
+                <span asp-validation-for="Precio.Precio" class="text-danger"></span>
             </div>
+            <br />
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoriasModal">
+                    Seleccionar Categorías
+                </button>
+
+                @Html.Partial("_ArticulosCategoriasPartial", Model)
+
+            </div>
+            <br />
+            <div>
+                <div id="dropzone" class="dropzone">
+                    Arrastra y suelta la imagen aquí o haz clic para seleccionar.
+                </div>
+                <input type="file" id="fileInput" name="Imagen" class="form-control-file" hidden/>
+                <div id="previewContainer" class="preview-container"></div>
+            </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -57,4 +72,6 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/articulos/cargarimagen.js"></script>
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
 }

@@ -1,0 +1,26 @@
+.dropzone {
+    border: 2px dashed #007bff;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .dropzone.dragover {
+        background-color: #e9ecef;
+    }
+
+    .dropzone.has-image {
+        border: 2px solid #28a745;
+        background-color: #f8f9fa;
+    }
+
+.preview-container {
+    margin-top: 10px;
+    display: none;
+}
+
+    .preview-container img {
+        width: 250px;
+        height: 250px;
+    }
