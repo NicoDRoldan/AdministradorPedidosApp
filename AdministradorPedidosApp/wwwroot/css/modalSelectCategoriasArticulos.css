@@ -1,0 +1,4 @@
+﻿#categoriasTableContainer {
+    max-height: 400px; /* Ajusta la altura máxima según necesites */
+    overflow-y: auto;
+}

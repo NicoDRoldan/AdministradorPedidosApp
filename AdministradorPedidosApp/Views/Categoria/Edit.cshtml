@@ -5,6 +5,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<link href="~/css/modalselectcategoriasarticulos.css" rel="stylesheet" />
+
 <h1>Edit</h1>
 
 <h4>CategoriasModel</h4>
@@ -19,6 +21,16 @@
                 <input asp-for="Nombre" class="form-control" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
+            <br />
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoriasModal">
+                    Agregar Artículos
+                </button>
+
+                @Html.Partial("_ArticulosCategoriasPartial", Model)
+
+            </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -31,5 +43,8 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
 }

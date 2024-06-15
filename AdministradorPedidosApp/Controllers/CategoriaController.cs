@@ -19,13 +19,11 @@ namespace AdministradorPedidosApp.Controllers
             _context = context;
         }
 
-        // GET: Categoria
         public async Task<IActionResult> Index()
         {
             return View(await _context.Categorias.ToListAsync());
         }
 
-        // GET: Categoria/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -43,37 +41,68 @@ namespace AdministradorPedidosApp.Controllers
             return View(categoriasModel);
         }
 
-        // GET: Categoria/Create
         public IActionResult Create()
         {
-            return View();
+            var entityModel = new CategoriasModel();
+            ViewBag.Articulos = _context.Articulos.ToList();
+            return View(entityModel);
         }
 
-        // POST: Categoria/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id_Categoria,Nombre")] CategoriasModel categoriasModel)
         {
-            if (ModelState.IsValid)
+            var articulosSeleccionadas = Request.Form["ArticulosSeleccionados"].Select(x => int.Parse(x)).ToList();
+
+            try
             {
                 _context.Add(categoriasModel);
                 await _context.SaveChangesAsync();
+
+                if (articulosSeleccionadas.Any())
+                {
+                    foreach (var id_Articulo in articulosSeleccionadas)
+                    {
+                        Articulos_CategoriasModel articulos_Categorias = new Articulos_CategoriasModel
+                        {
+                            Id_Articulo = id_Articulo,
+                            Id_Categoria = categoriasModel.Id_Categoria
+                        };
+                        _context.Add(articulos_Categorias);
+                    }
+                }
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(categoriasModel);
+            catch
+            {
+                var entityModel = new CategoriasModel();
+                ViewBag.Articulos = _context.Articulos.ToList();
+                return View(categoriasModel);
+            }
         }
 
-        // GET: Categoria/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            var entityModel = new CategoriasModel();
+            ViewBag.Articulos = _context.Articulos.ToList();
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var categoriasModel = await _context.Categorias.FindAsync(id);
+            var categoriasModel = await _context.Categorias
+                .Include(c => c.Articulos_Categorias)
+                    .ThenInclude(ca => ca.Articulo)
+                    .Where(c => c.Id_Categoria == id)
+                    .FirstOrDefaultAsync();
+
+            categoriasModel.ArticulosSeleccionados = categoriasModel
+                .Articulos_Categorias
+                .Select(ac => ac.Articulo.Id_Articulo).ToList();
+
             if (categoriasModel == null)
             {
                 return NotFound();
@@ -81,9 +110,6 @@ namespace AdministradorPedidosApp.Controllers
             return View(categoriasModel);
         }
 
-        // POST: Categoria/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id_Categoria,Nombre")] CategoriasModel categoriasModel)
@@ -92,31 +118,64 @@ namespace AdministradorPedidosApp.Controllers
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            try
             {
-                try
+                var articulosSeleccionados = Request.Form["ArticulosSeleccionados"].Select(x => int.Parse(x)).ToList();
+
+                var articulosCategoriasExistentes = await _context.Articulos_Categorias
+                    .Where(ac => ac.Id_Categoria == id)
+                    .ToListAsync();
+
+                List<int> idArticulos = await _context.Articulos
+                    .Select(a => a.Id_Articulo)
+                    .ToListAsync();
+
+                if(articulosSeleccionados.Any())
                 {
-                    _context.Update(categoriasModel);
-                    await _context.SaveChangesAsync();
+                    foreach (var id_ArticuloSeleccionado in articulosSeleccionados)
+                    {
+                        foreach (var id_Articulo in idArticulos)
+                        {
+                            var artCategoriaEntity = await _context.Articulos_Categorias.Where(ac => ac.Id_Categoria == id && ac.Id_Articulo == id_Articulo).FirstOrDefaultAsync();
+
+                            if(id_Articulo == id_ArticuloSeleccionado &&  artCategoriaEntity is null)
+                            {
+                                Articulos_CategoriasModel articulos_Categorias = new Articulos_CategoriasModel
+                                {
+                                    Id_Articulo = id_Articulo,
+                                    Id_Categoria = id
+                                };
+                                _context.Add(articulos_Categorias);
+                            }
+                            else if(!articulosSeleccionados.Contains(id_Articulo) && artCategoriaEntity != null)
+                            {
+                                _context.Remove(artCategoriaEntity);
+                            }
+                        }
+                    }
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!CategoriasModelExists(categoriasModel.Id_Categoria))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    _context.RemoveRange(articulosCategoriasExistentes);
                 }
-                return RedirectToAction(nameof(Index));
+
+                _context.Update(categoriasModel);
+                await _context.SaveChangesAsync();
             }
-            return View(categoriasModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CategoriasModelExists(categoriasModel.Id_Categoria))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Categoria/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,7 +193,6 @@ namespace AdministradorPedidosApp.Controllers
             return View(categoriasModel);
         }
 
-        // POST: Categoria/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

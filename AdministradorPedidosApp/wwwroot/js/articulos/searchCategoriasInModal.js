@@ -17,3 +17,14 @@ $(document).ready(function () {
         });
     });
 });
+
+$(document).ready(function () {
+    var rowCount = $('#categoriasTableBody tr').length;
+    if (rowCount > 5) {
+        $('#categoriasTableContainer').css('max-height', '400px');
+        $('#categoriasTableContainer').css('overflow-y', 'auto');
+    } else {
+        $('#categoriasTableContainer').css('max-height', '');
+        $('#categoriasTableContainer').css('overflow-y', '');
+    }
+});

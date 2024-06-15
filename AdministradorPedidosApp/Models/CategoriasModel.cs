@@ -12,5 +12,13 @@ namespace AdministradorPedidosApp.Models
         public string Nombre { get; set; }
 
         public virtual ICollection<Articulos_CategoriasModel> Articulos_Categorias { get; set; }
+
+        [NotMapped]
+        public List<int> ArticulosSeleccionados { get; set; }
+
+        public CategoriasModel()
+        {
+            ArticulosSeleccionados = new List<int>();
+        }
     }
 }
