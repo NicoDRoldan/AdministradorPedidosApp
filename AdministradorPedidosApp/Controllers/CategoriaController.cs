@@ -7,28 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AdministradorPedidosApp.Data;
 using AdministradorPedidosApp.Models;
-using AdministradorPedidosApp.Interfaces;
 
 namespace AdministradorPedidosApp.Controllers
 {
-    public class RubroController : Controller
+    public class CategoriaController : Controller
     {
         private readonly AdministradorPedidosAppContext _context;
-        private readonly IRubroService _rubroService;
 
-        public RubroController(AdministradorPedidosAppContext context, IRubroService rubroService)
+        public CategoriaController(AdministradorPedidosAppContext context)
         {
             _context = context;
-            _rubroService = rubroService;
         }
 
-        // GET: Rubro
+        // GET: Categoria
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Rubros.ToListAsync());
+            return View(await _context.Categorias.ToListAsync());
         }
 
-        // GET: Rubro/Details/5
+        // GET: Categoria/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,38 +33,39 @@ namespace AdministradorPedidosApp.Controllers
                 return NotFound();
             }
 
-            var rubroModel = await _context.Rubros
-                .FirstOrDefaultAsync(m => m.Id_Rubro == id);
-            if (rubroModel == null)
+            var categoriasModel = await _context.Categorias
+                .FirstOrDefaultAsync(m => m.Id_Categoria == id);
+            if (categoriasModel == null)
             {
                 return NotFound();
             }
 
-            return View(rubroModel);
+            return View(categoriasModel);
         }
 
-        // GET: Rubro/Create
+        // GET: Categoria/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Rubro/Create
+        // POST: Categoria/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Rubro,Nombre")] RubroModel rubroModel, IFormFile imagen)
+        public async Task<IActionResult> Create([Bind("Id_Categoria,Nombre")] CategoriasModel categoriasModel)
         {
             if (ModelState.IsValid)
             {
-                await _rubroService.Create(rubroModel, imagen);
+                _context.Add(categoriasModel);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(rubroModel);
+            return View(categoriasModel);
         }
 
-        // GET: Rubro/Edit/5
+        // GET: Categoria/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -75,22 +73,22 @@ namespace AdministradorPedidosApp.Controllers
                 return NotFound();
             }
 
-            var rubroModel = await _context.Rubros.FindAsync(id);
-            if (rubroModel == null)
+            var categoriasModel = await _context.Categorias.FindAsync(id);
+            if (categoriasModel == null)
             {
                 return NotFound();
             }
-            return View(rubroModel);
+            return View(categoriasModel);
         }
 
-        // POST: Rubro/Edit/5
+        // POST: Categoria/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Rubro,Nombre")] RubroModel rubroModel, IFormFile imagen)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Categoria,Nombre")] CategoriasModel categoriasModel)
         {
-            if (id != rubroModel.Id_Rubro)
+            if (id != categoriasModel.Id_Categoria)
             {
                 return NotFound();
             }
@@ -99,11 +97,12 @@ namespace AdministradorPedidosApp.Controllers
             {
                 try
                 {
-                    await _rubroService.Edit(id, rubroModel, imagen);
+                    _context.Update(categoriasModel);
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!RubroModelExists(rubroModel.Id_Rubro))
+                    if (!CategoriasModelExists(categoriasModel.Id_Categoria))
                     {
                         return NotFound();
                     }
@@ -114,10 +113,10 @@ namespace AdministradorPedidosApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(rubroModel);
+            return View(categoriasModel);
         }
 
-        // GET: Rubro/Delete/5
+        // GET: Categoria/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -125,34 +124,34 @@ namespace AdministradorPedidosApp.Controllers
                 return NotFound();
             }
 
-            var rubroModel = await _context.Rubros
-                .FirstOrDefaultAsync(m => m.Id_Rubro == id);
-            if (rubroModel == null)
+            var categoriasModel = await _context.Categorias
+                .FirstOrDefaultAsync(m => m.Id_Categoria == id);
+            if (categoriasModel == null)
             {
                 return NotFound();
             }
 
-            return View(rubroModel);
+            return View(categoriasModel);
         }
 
-        // POST: Rubro/Delete/5
+        // POST: Categoria/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var rubroModel = await _context.Rubros.FindAsync(id);
-            if (rubroModel != null)
+            var categoriasModel = await _context.Categorias.FindAsync(id);
+            if (categoriasModel != null)
             {
-                _context.Rubros.Remove(rubroModel);
+                _context.Categorias.Remove(categoriasModel);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool RubroModelExists(int id)
+        private bool CategoriasModelExists(int id)
         {
-            return _context.Rubros.Any(e => e.Id_Rubro == id);
+            return _context.Categorias.Any(e => e.Id_Categoria == id);
         }
     }
 }

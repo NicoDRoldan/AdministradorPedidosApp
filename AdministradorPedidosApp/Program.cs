@@ -23,6 +23,7 @@ builder.Services.AddDbContext<AdministradorPedidosAppContext>(options =>
     );
 
 builder.Services.AddScoped<IArticuloService, ArticuloService>();
+builder.Services.AddScoped<IRubroService, RubroService>();
 
 var app = builder.Build();
 

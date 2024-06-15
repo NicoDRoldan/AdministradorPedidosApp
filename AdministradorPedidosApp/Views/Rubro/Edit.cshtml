@@ -5,13 +5,15 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<link href="~/css/cargarimagen.css" rel="stylesheet" />
+
 <h1>Edit</h1>
 
 <h4>RubroModel</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id_Rubro" />
             <div class="form-group">
@@ -19,6 +21,15 @@
                 <input asp-for="Nombre" class="form-control" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
+            <br />
+            <div>
+                <div id="dropzone" class="dropzone">
+                    Arrastra y suelta la imagen aquí o haz clic para seleccionar.
+                </div>
+                <input type="file" id="fileInput" name="Imagen" class="form-control-file" hidden />
+                <div id="previewContainer" class="preview-container"></div>
+            </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -31,5 +42,8 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/articulos/cargarimagen.js"></script>
 }
