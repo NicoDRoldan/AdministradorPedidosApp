@@ -24,6 +24,12 @@ builder.Services.AddDbContext<AdministradorPedidosAppContext>(options =>
 
 builder.Services.AddScoped<IArticuloService, ArticuloService>();
 builder.Services.AddScoped<IRubroService, RubroService>();
+builder.Services.AddScoped<ICuponService, CuponService>();
+
+builder.Services.AddHttpClient("WSCuponesClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7159/api");
+});
 
 var app = builder.Build();
 

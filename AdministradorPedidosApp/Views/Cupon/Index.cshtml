@@ -1,0 +1,83 @@
+﻿@model IEnumerable<AdministradorPedidosApp.Models.CuponModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if(TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["Error"]
+    </div>
+}
+else
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    <div id="success-message" style="margin: 5px;"></div>
+    <input type="text" id="articulosSearchIndex" class="form-control" placeholder="Buscar Cupón..." />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Descripcion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PorcentajeDto)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FechaInicio)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FechaFin)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TipoCupon)
+                </th>
+            </tr>
+        </thead>
+        <tbody id="articulosIndexTableBody">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id_Cupon)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PorcentajeDto)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FechaInicio)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FechaFin)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TipoCupon)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section scripts {
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
+
+    <script>
+        var successMessage = sessionStorage.getItem('successMessage');
+        if(successMessage){
+            $('#success-message').removeClass()
+                .addClass('text-success').text(successMessage);
+            sessionStorage.removeItem('successMessage');
+        }
+    </script>
+}
