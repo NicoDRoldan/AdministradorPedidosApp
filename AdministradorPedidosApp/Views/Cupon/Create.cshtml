@@ -47,7 +47,6 @@
                     Seleccionar Artículos
                 </button>
 
-
             </div>
             <br />
             <div>
@@ -59,8 +58,19 @@
             </div>
             <br />
 
+            <br />
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoriasCuponModal">
+                    Seleccionar Categorías
+                </button>
+
+            </div>
+            <br />
+
         </form>
-        @Html.Partial("_ArticulosCuponPartial", Model)
+        @Html.Partial("_ArticulosCuponPartial", Model) @*Modal para seleccionar artículos para las promociones*@
+
+        @Html.Partial("_CuponCategoriasPartial", Model) @*Modal para seleccionar a que categorias pertenece el cupón*@
 
         <div class="form-group">
             <button class="btn btn-primary" id="btn-venta" onclick="altaCupon()">Crear</button>
@@ -80,6 +90,7 @@
 
     <script>
         var detalles = [];
+        var categoriasSeleccionadas = [];
 
         function agregarDetallesCupon() {
             detalles = [];
@@ -95,6 +106,17 @@
             $('#articulosMoldal').modal('hide');
         }
 
+        function agregarCategoriasAlCupon(){
+            agregarCategoriasAlCupon = [];
+
+            $('#categoriasTable input[type=checkbox]:checked').each(function () {
+                var idCategoria = $(this).attr('id');
+                categoriasSeleccionadas.push(parseInt(idCategoria));
+            });
+            console.log(categoriasSeleccionadas);
+            $('#categoriasModal').modal('hide');
+        }
+
         function altaCupon() {
             $('#error-message').text("");
 
@@ -108,6 +130,10 @@
             formData.append('TipoCupon', document.getElementById('tipoCuponSelect').value);
 
             formData.append('Detalle', JSON.stringify(detalles));
+
+            formData.append('CategoriasSeleccionadas', categoriasSeleccionadas);
+
+            console.log(formData);
 
             $.ajax({
                 url: '@Url.Action("AltaCupon", "Cupon")',
@@ -145,78 +171,5 @@
                 }
             });
         }
-        // function altaCupon() {
-        //     $('#error-message').text("");
-
-        //     var form = document.getElementById('cuponForm');
-        //     var formData = new FormData(form);
-
-        //     formData.append('Descripcion', $('#Descripcion').val());
-        //     formData.append('PorcentajeDto', $('#PorcentajeDto').val());
-        //     formData.append('FechaInicio', $('#FechaInicio').val());
-        //     formData.append('FechaFin', $('#FechaFin').val());
-        //     formData.append('TipoCupon', document.getElementById('tipoCuponSelect').value);
-
-        //     var detallesSerialize = JSON.stringify(detalles);
-        //     formData.append('Detalle', detallesSerialize);
-
-        //     console.log(detalles);
-
-        //     console.log(detallesSerialize);
-
-        //     console.log(formData);
-
-        //     var cupon = {
-        //         Descripcion: $('#Descripcion').val(),
-        //         PorcentajeDto: parseFloat($('#PorcentajeDto').val()),
-        //         FechaInicio: $('#FechaInicio').val(),
-        //         FechaFin: $('#FechaFin').val(),
-        //         TipoCupon: document.getElementById('tipoCuponSelect').value,
-        //         Url_Imagen: $('#fileInput').val(),
-        //         Detalle: detalles
-        //     };
-
-        //     if (cupon.Descripcion == '' || cupon.PorcentajeDto == 0
-        //         || cupon.FechaInicio == '' || cupon.FechaFin == '') {
-        //         $('#error-message').removeClass().
-        //             addClass('text-danger').text("Completar todos los campos");
-        //         return;
-        //     }
-
-        //     $.ajax({
-        //         url: '@Url.Action("AltaCupon", "Cupon")',
-        //         type: 'POST',
-        //         contentType: 'application/json',
-        //         data: JSON.stringify(cupon),
-        //         success: function (response) {
-        //             if (response.success) {
-
-        //                 window.location.href = '/Cupon/Index';
-        //                 sessionStorage.setItem('successMessage', response.message);
-
-        //                 $('#success-message').removeClass().
-        //                     addClass('text-danger').text(response.message);
-
-        //             } else if (!response.success) {
-
-        //                 $('#error-message').removeClass().
-        //                     addClass('text-danger').text(response.message);
-        //             }
-
-        //         },
-        //         error: function (response) {
-
-        //             if (response.responseJSON && response.responseJSON.error) {
-
-        //                 $('#error-message').removeClass().
-        //                     addClass('text-danger').text("Error al crear el cupón.");
-        //             } else {
-
-        //                 $('#error-message').removeClass().
-        //                     addClass('text-danger').text("Error al crear el cupón ERROR FALSE 2.");
-        //             }
-        //         }
-        //     });
-        // }
     </script>
 }

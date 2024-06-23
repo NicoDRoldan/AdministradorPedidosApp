@@ -25,9 +25,14 @@ namespace AdministradorPedidosApp.Models
         [JsonIgnore]
         public List<int> ArticulosSeleccionados { get; set; }
 
+        [NotMapped]
+        [JsonIgnore]
+        public List<int> CategoriasSeleccionadas { get; set; }
+
         public CuponModel()
         {
             ArticulosSeleccionados = new List<int>();
+            CategoriasSeleccionadas = new List<int>();
         }
     }
 }

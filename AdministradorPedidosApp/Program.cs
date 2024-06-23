@@ -26,9 +26,14 @@ builder.Services.AddScoped<IArticuloService, ArticuloService>();
 builder.Services.AddScoped<IRubroService, RubroService>();
 builder.Services.AddScoped<ICuponService, CuponService>();
 
+//builder.Services.AddHttpClient("WSCuponesClient", client =>
+//{
+//    client.BaseAddress = new Uri("https://localhost:7159/api");
+//});
+
 builder.Services.AddHttpClient("WSCuponesClient", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7159/api");
+    client.BaseAddress = new Uri("http://localhost:5203/api");
 });
 
 var app = builder.Build();

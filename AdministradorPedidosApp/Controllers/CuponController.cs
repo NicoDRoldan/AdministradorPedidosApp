@@ -35,23 +35,32 @@ namespace AdministradorPedidosApp.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var cuponModel = new CuponModel();
+            try
+            {
+                var cuponModel = new CuponModel();
 
-            ViewBag.Articulos = await _context.Articulos
-                .Include(a => a.Precio)
-                .Where(a => a.Activo == true
-                    && a.Precio.Precio != 0)
-                .ToListAsync();
-
-            return View(cuponModel);
+                ViewBag.Articulos = await _context.Articulos
+                    .Include(a => a.Precio)
+                    .Where(a => a.Activo == true
+                        && a.Precio.Precio != 0)
+                    .ToListAsync();
+                ViewBag.CategoriasCupones = await _cuponService.Create();
+                return View(cuponModel);
+            } 
+            catch(Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View();
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> AltaCupon([FromForm] CuponModel cupon, [FromForm] string? detalle = null, IFormFile? imagen = null)
+        public async Task<IActionResult> AltaCupon([FromForm] CuponModel cupon, [FromForm] string? detalle = null,
+            [FromForm] string? categoriasSeleccionadas = null, IFormFile? imagen = null)
         {
             try
             {
-                var result = await _cuponService.AltaCupon(cupon, detalle, imagen);
+                var result = await _cuponService.AltaCupon(cupon, detalle, categoriasSeleccionadas, imagen);
                 return Json(new { success = true, message = result });
             }
             catch(Exception ex)
