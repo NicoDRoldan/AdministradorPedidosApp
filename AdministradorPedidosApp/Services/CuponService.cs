@@ -97,18 +97,12 @@ namespace AdministradorPedidosApp.Services
             [FromForm] string? categoriasSeleccionadas = null, [FromForm] IFormFile? imagen = null)
         {
             if (detalle != null)
-            {
                 cupon.Detalle = JsonConvert.DeserializeObject<List<CuponDetalleModel>>(detalle);
-            }
-
-            List<int> categoriasSelect = categoriasSeleccionadas.Split(',')
-                                                    .Select(int.Parse)
-                                                    .ToList();
 
             if (categoriasSeleccionadas != null)
-            {
-                cupon.CategoriasSeleccionadas = categoriasSelect;
-            }
+                cupon.CategoriasSeleccionadas = categoriasSeleccionadas.Split(',')
+                                                    .Select(int.Parse)
+                                                    .ToList();
 
             if ((!cupon.Detalle.Any()) && cupon.TipoCupon == "PROMO")
                 throw new Exception("Por favor cargar artículos");

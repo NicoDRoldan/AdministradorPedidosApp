@@ -19,6 +19,8 @@ namespace AdministradorPedidosApp.Models
 
         public string? Url_Imagen { get; set; }
 
+        public bool Activo { get; set; }
+
         public virtual ICollection<CuponDetalleModel>? Detalle { get; set; }
 
         [NotMapped]
