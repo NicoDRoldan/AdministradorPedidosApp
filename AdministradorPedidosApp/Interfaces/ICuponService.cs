@@ -8,12 +8,14 @@ namespace AdministradorPedidosApp.Interfaces
     {
         Task<List<CuponModel>> Index();
 
-        Task<List<CategoriaDTO>> Create();
+        Task<List<CategoriaDTO>> TraerCategorias();
         // Llamado a api
         Task<string> AltaCupon([FromForm] CuponModel cupon, [FromForm] string? detalle = null,
             [FromForm] string? categoriasSeleccionadas = null, [FromForm] IFormFile? imagen = null);
         //Task<string> AltaCupon(CuponModel cupon);
 
         Task SubirImagenCupon(int id_Cupon, [FromForm] IFormFile? imagen = null);
+
+        Task<CuponModel> ObtenerCuponPorId(int id);
     }
 }

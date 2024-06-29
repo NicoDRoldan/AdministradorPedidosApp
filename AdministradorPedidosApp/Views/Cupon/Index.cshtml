@@ -6,46 +6,7 @@
 }
 
 <link href="~/css/registro-delete.css" rel="stylesheet" />
-
-<!-- Estilos k -->
-<style>
-    .k-modal-content {
-        background-color: #fce4ec;
-        border-radius: 15px;
-        border: 2px solid #f8bbd0;
-        text-align: center;
-    }
-
-    .k-modal-header {
-        border-bottom: 0;
-    }
-
-    .k-modal-body {
-        font-family: 'Comic Sans MS', cursive, sans-serif;
-        color: #d81b60;
-        font-size: 1.2em;
-    }
-
-    .k-modal-footer {
-        border-top: 0;
-    }
-
-    .k-image {
-        width: 100px;
-        height: auto;
-        margin-top: 10px;
-    }
-
-    .btn-secondary-k {
-        background-color: #f48fb1;
-        border: none;
-        border-radius: 20px;
-    }
-
-        .btn-secondary-k:hover {
-            background-color: #f06292;
-        }
-</style>
+<link href="~/css/cupon-delete.css" rel="stylesheet" />
 
 @if(TempData["Error"] != null)
 {
@@ -115,22 +76,23 @@ else
                         @Html.DisplayFor(modelItem => item.Activo)
                     </td>
                     <td>
-                        <button class="btn-secondary-k" id="" data-id="@item.Id_Cupon" data-bs-toggle="modal" data-bs-target="#modal-delete-registro-@item.Id_Cupon">Eliminar Cupón</button>
+                        <button class="btn btn-secondary btn-secondary-k" id="" data-id="@item.Id_Cupon" data-bs-toggle="modal" data-bs-target="#modal-delete-registro-@item.Id_Cupon">Eliminar</button>
                         @* Modal de eliminar *@
                         <div class="modal fade" id="modal-delete-registro-@item.Id_Cupon" tabindex="-1" role="dialog" aria-labelledby="modal-delete-registroLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-body">
+                                <div class="modal-content k-modal-content">
+                                    <div class="modal-body k-modal-body">
                                         <p>¿Seguro que quieres eliminar el cupón con ID: @item.Id_Cupon?</p>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer k-modal-footer">
                                         <h5 class="modal-title" id="modal-errorLabel-@item.Id_Cupon"></h5>
-                                        <button type="button" class="btn btn-secondary-k" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                         <button type="button" class="btn btn-danger" onclick="eliminarCupon(@item.Id_Cupon)">Confirmar</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <a class="btn btn-secondary btn-secondary-k" asp-controller="Cupon" asp-action="Edit" asp-route-id="@item.Id_Cupon">Editar</a>
                     </td>
                     @* Modal de confirmación de eliminación exitosa *@
                     <div class="modal fade" id="modal-success" tabindex="-1" role="dialog" aria-labelledby="modal-successLabel" aria-hidden="true">

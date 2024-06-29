@@ -4,8 +4,10 @@ using AdministradorPedidosApp.Models;
 using AdministradorPedidosApp.Models.DTOs;
 using Azure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -62,7 +64,7 @@ namespace AdministradorPedidosApp.Services
             }
         }
 
-        public async Task<List<CategoriaDTO>> Create()
+        public async Task<List<CategoriaDTO>> TraerCategorias()
         {
             try
             {
@@ -168,6 +170,43 @@ namespace AdministradorPedidosApp.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error al cargar la imagen del cupón: {ex.Message}");
+            }
+        }
+
+        public async Task<CuponModel> ObtenerCuponPorId(int id)
+        {
+            try
+            {
+                var cuponClient = _httpClientFactory.CreateClient("WSCuponesClient");
+                cuponClient.DefaultRequestHeaders.Accept.Clear();
+                cuponClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
+                    .MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await cuponClient.GetAsync($"api/Cupones/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var cuponJson = await response.Content.ReadAsStringAsync();
+                    var cuponModel = JsonConvert.DeserializeObject<CuponModel>(cuponJson);
+                    return cuponModel;
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+
+                    if (error.Contains("UseSqlServer"))
+                        error = "Error: No se pudo establecer la conexión con la base de datos.";
+
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                var error = ex.Message;
+                if (ex.Message.Contains("El equipo de destino denegó expresame dicha"))
+                    error = "Error: No se pudo establecer conexión con el servidor.";
+
+                throw new Exception(error);
             }
         }
     }

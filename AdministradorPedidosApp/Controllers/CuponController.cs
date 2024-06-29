@@ -44,7 +44,7 @@ namespace AdministradorPedidosApp.Controllers
                     .Where(a => a.Activo == true
                         && a.Precio.Precio != 0)
                     .ToListAsync();
-                ViewBag.CategoriasCupones = await _cuponService.Create();
+                ViewBag.CategoriasCupones = await _cuponService.TraerCategorias();
                 return View(cuponModel);
             } 
             catch(Exception ex)
@@ -53,6 +53,8 @@ namespace AdministradorPedidosApp.Controllers
                 return View();
             }
         }
+
+        #region AltaCupon
 
         [HttpPost]
         public async Task<IActionResult> AltaCupon([FromForm] CuponModel cupon, [FromForm] string? detalle = null,
@@ -66,6 +68,29 @@ namespace AdministradorPedidosApp.Controllers
             catch(Exception ex)
             {
                 return Json(new { success = false, message = ex.Message});
+            }
+        }
+
+        #endregion
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var cuponModel = await _cuponService.ObtenerCuponPorId(id);
+
+                ViewBag.Articulos = await _context.Articulos
+                    .Include(a => a.Precio)
+                    .Where(a => a.Activo == true
+                        && a.Precio.Precio != 0)
+                    .ToListAsync();
+                ViewBag.CategoriasCupones = await _cuponService.TraerCategorias();
+                return View(cuponModel);
+            }
+            catch(Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View();
             }
         }
     }

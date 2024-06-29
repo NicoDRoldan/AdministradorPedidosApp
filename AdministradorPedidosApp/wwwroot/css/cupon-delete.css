@@ -1,0 +1,36 @@
+﻿.k-modal-content {
+    background-color: #fce4ec;
+    border-radius: 15px;
+    border: 2px solid #f8bbd0;
+    text-align: center;
+}
+
+.k-modal-header {
+    border-bottom: 0;
+}
+
+.k-modal-body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    color: #d81b60;
+    font-size: 1.2em;
+}
+
+.k-modal-footer {
+    border-top: 0;
+}
+
+.k-image {
+    width: 100px;
+    height: auto;
+    margin-top: 10px;
+}
+
+.btn-secondary-k {
+    background-color: #d81b60;
+    border: none;
+    border-radius: 20px;
+}
+
+    .btn-secondary-k:hover {
+        background-color: #f06292;
+    }

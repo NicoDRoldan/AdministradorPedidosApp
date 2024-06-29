@@ -1,0 +1,95 @@
+﻿@model AdministradorPedidosApp.Models.CuponModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/css/cargarimagen.css" rel="stylesheet" />
+<link href="~/css/modalselectcategoriasarticulos.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-4">
+        <form id="cuponForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Descripcion</label>
+                <input asp-for="Descripcion" class="form-control" />
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Porcentaje de Descuento</label>
+                <input asp-for="PorcentajeDto" class="form-control" data-val="false" />
+                <span asp-validation-for="PorcentajeDto" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Inicio de Vigencia</label>
+                <input asp-for="FechaInicio" class="form-control" type="date" />
+                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Fin de Vigencia</label>
+                <input asp-for="FechaFin" class="form-control" type="date" />
+                <span asp-validation-for="FechaFin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Tipo de Cupón</label>
+                <select asp-for="TipoCupon" class="form-control" id="tipoCuponSelect">
+                    <option value="DESCUENTO">Descuento</option>
+                    <option value="PROMO">Promoción</option>
+                </select>
+                <span asp-validation-for="TipoCupon" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
+                </label>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <button type="button" id="agregarArticulosBtn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoriasModal">
+                    Seleccionar Artículos
+                </button>
+
+            </div>
+            <br />
+            <div>
+                <div id="dropzone" class="dropzone">
+                    Arrastra y suelta la imagen aquí o haz clic para seleccionar.
+                </div>
+                <input type="file" id="fileInput" name="Imagen" class="form-control-file" hidden />
+                <div id="previewContainer" class="preview-container"></div>
+            </div>
+            <br />
+
+            <br />
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoriasCuponModal">
+                    Seleccionar Categorías
+                </button>
+
+            </div>
+            <br />
+        </form>
+        @Html.Partial("_ArticulosCuponPartial", Model) @*Modal para seleccionar artículos para las promociones*@
+
+        @Html.Partial("_CuponCategoriasPartial", Model) @*Modal para seleccionar a que categorias pertenece el cupón*@
+
+        <div class="form-group">
+            <a class="btn btn-secondary" asp-action="Index">Cancelar</a>
+            <button class="btn btn-primary" id="btn-venta" onclick="editarCupon()">Editar</button>
+        </div>
+
+        <div id="error-message" style="margin-top: 5px;"></div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/articulos/cargarimagen.js"></script>
+    <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
+    <script src="~/js/cupones/altaCupon.js"></script>
+}
