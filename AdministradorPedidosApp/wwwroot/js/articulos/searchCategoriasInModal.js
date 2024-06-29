@@ -28,3 +28,14 @@ $(document).ready(function () {
         $('#categoriasTableContainer').css('overflow-y', '');
     }
 });
+
+
+// Script de busqueda en Modal de categorias de cupones.
+$(document).ready(function () {
+    $("#categoriaCuponSearch").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $("#categoriasCuponTableBody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+});

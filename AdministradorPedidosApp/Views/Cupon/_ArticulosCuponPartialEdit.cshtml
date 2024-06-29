@@ -1,0 +1,47 @@
+﻿@model AdministradorPedidosApp.Models.CuponModel
+<!-- Modal -->
+<div class="modal fade" id="categoriasModal" tabindex="-1" role="dialog" aria-labelledby="categoriasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoriasModalLabel">Seleccionar Artículos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="categoriaSearch" class="form-control" placeholder="Buscar Artículos..." />
+                <div id="categoriasTableContainer">
+                    <table class="table table-striped mt-3" id="articulosTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Seleccionar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriasTableBody">
+                            @foreach (var articulo in ViewBag.Articulos)
+                            {
+                                <tr>
+                                    <td>@articulo.Id_Articulo</td>
+                                    <td>@articulo.Nombre</td>
+                                    <td>
+                                        <input type="number" min="1" class="form-control" name="Detalle[@articulo.Id_Articulo].Cantidad" value="@articulo.Cantidad">
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" id="@articulo.Id_Articulo" name="ArticulosSeleccionados" value="@articulo.Id_Articulo"
+                                        @(Model.ArticulosSeleccionados.Contains(articulo.Id_Articulo) ? "checked" : "")>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="agregarDetallesCupon()">Guardar Selección</button>
+            </div>
+        </div>
+    </div>
+</div>

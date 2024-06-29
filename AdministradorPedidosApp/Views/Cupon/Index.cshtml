@@ -5,6 +5,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<link href="~/css/registro-delete.css" rel="stylesheet" />
+<link href="~/css/cupon-delete.css" rel="stylesheet" />
+
 @if(TempData["Error"] != null)
 {
     <div class="alert alert-danger" role="alert">
@@ -39,6 +42,12 @@ else
                 <th>
                     @Html.DisplayNameFor(model => model.TipoCupon)
                 </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activo)
+                </th>
+                <th>
+                    Acción
+                </th>
             </tr>
         </thead>
         <tbody id="articulosIndexTableBody">
@@ -63,6 +72,38 @@ else
                     <td>
                         @Html.DisplayFor(modelItem => item.TipoCupon)
                     </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Activo)
+                    </td>
+                    <td>
+                        <button class="btn btn-secondary btn-secondary-k" id="" data-id="@item.Id_Cupon" data-bs-toggle="modal" data-bs-target="#modal-delete-registro-@item.Id_Cupon">Eliminar</button>
+                        @* Modal de eliminar *@
+                        <div class="modal fade" id="modal-delete-registro-@item.Id_Cupon" tabindex="-1" role="dialog" aria-labelledby="modal-delete-registroLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content k-modal-content">
+                                    <div class="modal-body k-modal-body">
+                                        <p>¿Seguro que quieres eliminar el cupón con ID: @item.Id_Cupon?</p>
+                                    </div>
+                                    <div class="modal-footer k-modal-footer">
+                                        <h5 class="modal-title" id="modal-errorLabel-@item.Id_Cupon"></h5>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="button" class="btn btn-danger" onclick="eliminarCupon(@item.Id_Cupon)">Confirmar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="btn btn-secondary btn-secondary-k" asp-controller="Cupon" asp-action="Edit" asp-route-id="@item.Id_Cupon">Editar</a>
+                    </td>
+                    @* Modal de confirmación de eliminación exitosa *@
+                    <div class="modal fade" id="modal-success" tabindex="-1" role="dialog" aria-labelledby="modal-successLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content k-modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modal-successLabel"></h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </tr>
             }
         </tbody>
@@ -78,6 +119,55 @@ else
             $('#success-message').removeClass()
                 .addClass('text-success').text(successMessage);
             sessionStorage.removeItem('successMessage');
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Evento para detectar cuándo se abre un modal
+            $('body').on('shown.bs.modal', '.modal', function () {
+                var modalId = $(this).attr('id');
+                var cuponId = modalId.replace('modal-delete-registro-', '');
+                $('#modal-errorLabel-' + cuponId).text(''); // Limpiar el texto al abrir el modal
+            });
+
+            // Evento para detectar cuándo se cierra un modal
+            $('body').on('hidden.bs.modal', '.modal', function () {
+                var modalId = $(this).attr('id');
+                var cuponId = modalId.replace('modal-delete-registro-', '');
+                $('#modal-errorLabel-' + cuponId).text(''); // Limpiar el texto al cerrar el modal
+            });
+        });
+
+        function eliminarCupon(idCupon) {
+            console.log(idCupon);
+
+            $.ajax({
+                url: "http://localhost:5203/api/Cupones/" + idCupon,
+                type: "DELETE",
+                success: function (response) {
+                    if (response) {
+                        // Cerrar el modal de confirmación
+                        $('#modal-delete-registro-' + idCupon).modal('hide');
+                        // Mostrar el modal de éxito
+                        $('#modal-successLabel').text(response);
+                        $('#modal-success').modal('show');
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function (xhr) {
+                    var errorMessage;
+                    if (xhr.status === 400) {
+                        errorMessage = xhr.responseText; // Capturar el mensaje de error
+                    } else {
+                        errorMessage = "Error al comunicarse con el Web Service de Cupones.";
+                    }
+                    $('#modal-errorLabel-' + idCupon).removeClass().addClass('text-danger').text(errorMessage);
+                }
+            });
         }
     </script>
 }

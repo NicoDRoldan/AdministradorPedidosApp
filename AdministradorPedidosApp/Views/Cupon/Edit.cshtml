@@ -1,7 +1,7 @@
 ﻿@model AdministradorPedidosApp.Models.CuponModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -12,8 +12,9 @@
     <div class="col-md-4">
         <form id="cuponForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id_Cupon" />
             <div class="form-group">
-                <label class="control-label">Descripción</label>
+                <label class="control-label">Descripcion</label>
                 <input asp-for="Descripcion" class="form-control" />
                 <span asp-validation-for="Descripcion" class="text-danger"></span>
             </div>
@@ -71,14 +72,14 @@
 
             </div>
             <br />
-
         </form>
-        @Html.Partial("_ArticulosCuponPartial", Model) @*Modal para seleccionar artículos para las promociones*@
+        @Html.Partial("_ArticulosCuponPartialEdit", Model) @*Modal para seleccionar artículos para las promociones*@
 
         @Html.Partial("_CuponCategoriasPartial", Model) @*Modal para seleccionar a que categorias pertenece el cupón*@
 
         <div class="form-group">
-            <button class="btn btn-primary" id="btn-venta" onclick="altaCupon()">Crear</button>
+            <a class="btn btn-secondary" asp-action="Index">Cancelar</a>
+            <button class="btn btn-primary" id="btn-venta" onclick="editarCupon()">Editar</button>
         </div>
 
         <div id="error-message" style="margin-top: 5px;"></div>
@@ -112,7 +113,7 @@
             $('#articulosMoldal').modal('hide');
         }
 
-        function agregarCategoriasAlCupon(){
+        function agregarCategoriasAlCupon() {
             agregarCategoriasAlCupon = [];
 
             $('#categoriasTable input[type=checkbox]:checked').each(function () {
@@ -123,7 +124,20 @@
             $('#categoriasModal').modal('hide');
         }
 
-        function altaCupon() {
+        function editarCupon() {
+
+            if (detalles.length == 0) {
+                $('#articulosTable input[type=checkbox]:checked').each(function () {
+                    var idArticulo = $(this).attr('id');
+                    var cantidad = $(this).closest('tr').find('input[type=number]').val();
+                    detalles.push({
+                        Id_ArticuloAsociado: parseInt(idArticulo),
+                        Cantidad: parseInt(cantidad)
+                    });
+                });
+                $('#articulosMoldal').modal('hide');
+            }
+
             $('#error-message').text("");
 
             var form = document.getElementById('cuponForm');
@@ -135,7 +149,7 @@
             formData.append('FechaFin', $('#FechaFin').val());
             formData.append('TipoCupon', document.getElementById('tipoCuponSelect').value);
 
-            formData.append('EndPoint', 'CrearCupon');
+            formData.append('EndPoint', 'EditarCupon');
 
             formData.append('Detalle', JSON.stringify(detalles));
 
