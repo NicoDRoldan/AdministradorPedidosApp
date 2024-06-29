@@ -12,6 +12,7 @@
     <div class="col-md-4">
         <form id="cuponForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id_Cupon" />
             <div class="form-group">
                 <label class="control-label">Descripcion</label>
                 <input asp-for="Descripcion" class="form-control" />
@@ -72,7 +73,7 @@
             </div>
             <br />
         </form>
-        @Html.Partial("_ArticulosCuponPartial", Model) @*Modal para seleccionar artículos para las promociones*@
+        @Html.Partial("_ArticulosCuponPartialEdit", Model) @*Modal para seleccionar artículos para las promociones*@
 
         @Html.Partial("_CuponCategoriasPartial", Model) @*Modal para seleccionar a que categorias pertenece el cupón*@
 
@@ -89,7 +90,108 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
     <script src="~/js/articulos/cargarimagen.js"></script>
     <script src="~/js/articulos/searchcategoriasinmodal.js"></script>
     <script src="~/js/cupones/altaCupon.js"></script>
+
+    <script>
+        var detalles = [];
+        var categoriasSeleccionadas = [];
+
+        function agregarDetallesCupon() {
+            detalles = [];
+
+            $('#articulosTable input[type=checkbox]:checked').each(function () {
+                var idArticulo = $(this).attr('id');
+                var cantidad = $(this).closest('tr').find('input[type=number]').val();
+                detalles.push({
+                    Id_ArticuloAsociado: parseInt(idArticulo),
+                    Cantidad: parseInt(cantidad)
+                });
+            });
+            $('#articulosMoldal').modal('hide');
+        }
+
+        function agregarCategoriasAlCupon() {
+            agregarCategoriasAlCupon = [];
+
+            $('#categoriasTable input[type=checkbox]:checked').each(function () {
+                var idCategoria = $(this).attr('id');
+                categoriasSeleccionadas.push(parseInt(idCategoria));
+            });
+            console.log(categoriasSeleccionadas);
+            $('#categoriasModal').modal('hide');
+        }
+
+        function editarCupon() {
+
+            if (detalles.length == 0) {
+                $('#articulosTable input[type=checkbox]:checked').each(function () {
+                    var idArticulo = $(this).attr('id');
+                    var cantidad = $(this).closest('tr').find('input[type=number]').val();
+                    detalles.push({
+                        Id_ArticuloAsociado: parseInt(idArticulo),
+                        Cantidad: parseInt(cantidad)
+                    });
+                });
+                $('#articulosMoldal').modal('hide');
+            }
+
+            $('#error-message').text("");
+
+            var form = document.getElementById('cuponForm');
+            var formData = new FormData(form);
+
+            formData.append('Descripcion', $('#Descripcion').val());
+            formData.append('PorcentajeDto', $('#PorcentajeDto').val());
+            formData.append('FechaInicio', $('#FechaInicio').val());
+            formData.append('FechaFin', $('#FechaFin').val());
+            formData.append('TipoCupon', document.getElementById('tipoCuponSelect').value);
+
+            formData.append('EndPoint', 'EditarCupon');
+
+            formData.append('Detalle', JSON.stringify(detalles));
+
+            formData.append('CategoriasSeleccionadas', categoriasSeleccionadas);
+
+            console.log(formData);
+
+            $.ajax({
+                url: '@Url.Action("AltaOEditCupon", "Cupon")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+
+                        window.location.href = '/Cupon/Index';
+                        sessionStorage.setItem('successMessage', response.message);
+
+                        $('#success-message').removeClass().
+                            addClass('text-danger').text(response.message);
+
+                    } else if (!response.success) {
+
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text(response.message);
+                    }
+
+                },
+                error: function (response) {
+
+                    if (response.responseJSON && response.responseJSON.error) {
+
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text("Error al crear el cupón.");
+                    } else {
+
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text("Error al crear el cupón ERROR FALSE 2.");
+                    }
+                }
+            });
+        }
+    </script>
 }

@@ -5,6 +5,7 @@ using AdministradorPedidosApp.Models.DTOs;
 using Azure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.Framework;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
@@ -95,7 +96,7 @@ namespace AdministradorPedidosApp.Services
             }
         }
 
-        public async Task<string> AltaCupon([FromForm] CuponModel cupon, [FromForm] string? detalle = null,
+        public async Task<string> AltaOEditCupon([FromForm] CuponModel cupon, string endPoint, [FromForm] string? detalle = null,
             [FromForm] string? categoriasSeleccionadas = null, [FromForm] IFormFile? imagen = null)
         {
             if (detalle != null)
@@ -123,21 +124,32 @@ namespace AdministradorPedidosApp.Services
 
                 var content = new StringContent(cuponJson, Encoding.UTF8, "application/json");
 
-                var response = await cuponClient.PostAsync("api/Cupones/CrearCupon", content);
+                var response = new HttpResponseMessage();
+
+                if (endPoint == "CrearCupon")
+                {
+                    response = await cuponClient.PostAsync($"api/Cupones/CrearCupon", content);
+                }
+                if(endPoint == "EditarCupon")
+                {
+                    response = await cuponClient.PutAsync($"api/Cupones/EditarCupon/{cupon.Id_Cupon}", content);
+                }
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var cuponCreado = JsonConvert.DeserializeObject<CuponModel>(responseData);
-                    if(imagen != null)
-                    {
-                        await SubirImagenCupon(cuponCreado.Id_Cupon, imagen);
-                    }
-                    return $"Cupón de {cupon.TipoCupon.ToLower()} creado correctamente.";
+
+                    dynamic responseObject = JsonConvert.DeserializeObject(responseData);
+
+                    await SubirImagenCupon((int)responseObject.cupon.id_Cupon, imagen);
+
+                    return responseObject.message;
                 }
                 else
                 {
-                    throw new Exception($"Error al crear el cupón: {response.ReasonPhrase}");
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new Exception(error);
                 }
             }
             catch (Exception ex)
@@ -155,16 +167,21 @@ namespace AdministradorPedidosApp.Services
                 cuponClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
                     .MediaTypeWithQualityHeaderValue("application/json"));
 
-                using (var formData = new MultipartFormDataContent())
+                if(imagen != null)
                 {
-                    if (imagen != null)
+                    using (var formData = new MultipartFormDataContent())
                     {
                         var streamContent = new StreamContent(imagen.OpenReadStream());
                         streamContent.Headers.ContentType = new System.Net.Http.Headers
                             .MediaTypeHeaderValue(imagen.ContentType);
                         formData.Add(streamContent, "imagen", imagen.FileName);
+
+                        await cuponClient.PostAsync($"api/Cupones/SubirImagenCupon/{id_Cupon}", formData);
                     }
-                    var response = await cuponClient.PostAsync($"api/Cupones/SubirImagenCupon/{id_Cupon}", formData);
+                }
+                else
+                {
+                    await cuponClient.PostAsync($"api/Cupones/SubirImagenCupon/{id_Cupon}", null);
                 }
             }
             catch (Exception ex)
@@ -207,6 +224,35 @@ namespace AdministradorPedidosApp.Services
                     error = "Error: No se pudo establecer conexión con el servidor.";
 
                 throw new Exception(error);
+            }
+        }
+
+        public async Task<List<ArticuloCuponDTO>> TraerArticulosSeleccionados(CuponModel cuponModel)
+        {
+            try
+            {
+                var articulos = await _context.Articulos
+                    .Include(a => a.Precio)
+                    .Where(a => a.Activo == true
+                        && a.Precio.Precio != 0)
+                    .ToListAsync();
+
+                var diccionarioArticulosSeleccionados = cuponModel.Detalle
+                    .ToDictionary(d => d.Id_ArticuloAsociado, d => d.Cantidad);
+
+                var articulosSeleccionados = articulos.Select(a => new ArticuloCuponDTO
+                {
+                    Id_Articulo = a.Id_Articulo,
+                    Nombre = a.Nombre,
+                    ArticuloSeleccionado = diccionarioArticulosSeleccionados.ContainsKey(a.Id_Articulo) ? true : false,
+                    Cantidad = diccionarioArticulosSeleccionados.ContainsKey(a.Id_Articulo) ? diccionarioArticulosSeleccionados[a.Id_Articulo] : 1
+                }).ToList();
+
+                return articulosSeleccionados;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }
