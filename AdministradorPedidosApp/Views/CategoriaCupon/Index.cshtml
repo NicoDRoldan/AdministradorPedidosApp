@@ -1,0 +1,57 @@
+﻿@model IEnumerable<AdministradorPedidosApp.Models.DTOs.CategoriaDTO>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if(TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["Error"]
+    </div>
+}
+else
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    <div id="success-message" style="margin: 5px;"></div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id_Categoria">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id_Categoria">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id_Categoria">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@section Scripts {
+    <script>
+        var successMessage = sessionStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#success-message').removeClass()
+                .addClass('text-success').text(successMessage);
+            sessionStorage.removeItem('successMessage');
+        }
+    </script>
+}

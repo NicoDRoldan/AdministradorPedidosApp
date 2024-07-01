@@ -25,6 +25,7 @@ builder.Services.AddDbContext<AdministradorPedidosAppContext>(options =>
 builder.Services.AddScoped<IArticuloService, ArticuloService>();
 builder.Services.AddScoped<IRubroService, RubroService>();
 builder.Services.AddScoped<ICuponService, CuponService>();
+builder.Services.AddScoped<ICategoriaCuponService, CategoriaCuponService>();
 
 //builder.Services.AddHttpClient("WSCuponesClient", client =>
 //{

@@ -130,7 +130,7 @@ namespace AdministradorPedidosApp.Services
                 {
                     response = await cuponClient.PostAsync($"api/Cupones/CrearCupon", content);
                 }
-                if(endPoint == "EditarCupon")
+                else if(endPoint == "EditarCupon")
                 {
                     response = await cuponClient.PutAsync($"api/Cupones/EditarCupon/{cupon.Id_Cupon}", content);
                 }
